@@ -1,11 +1,12 @@
 package com.develop.zuzik.repository.sample.domain.users
 
 import android.util.Log
+import com.develop.zuzik.repository.rx.RxRepository
 import com.develop.zuzik.repository.sample.datasource.repository.user.UserRepository
 import com.develop.zuzik.repository.sample.domain.entity.User
 import com.develop.zuzik.repository.sample.domain.filter.Filter
 import rx.Observable
-import rx.Observable.*
+import rx.Observable.empty
 import rx.subjects.BehaviorSubject
 import rx.subjects.PublishSubject
 
@@ -14,8 +15,9 @@ import rx.subjects.PublishSubject
  * Date: 1/8/17
  */
 class UsersModel(state: UsersModelState,
-                 private val repository: UserRepository) {
+                 repository: UserRepository) {
 
+    private val repository: RxRepository<User, Long> = RxRepository(repository)
     private val stateSubject = BehaviorSubject.create(state)
     private val errorSubject = PublishSubject.create<Throwable>()
 
@@ -31,8 +33,8 @@ class UsersModel(state: UsersModelState,
 
     fun updateWithAddUserIntent(addUserIntent: Observable<User>) =
             addUserIntent
-                    .flatMap { defer { just(repository.create(it)) } }
-                    .flatMap { defer { just(repository.readAll()) } }
+                    .flatMap { repository.create(it) }
+                    .flatMap { repository.readAll() }
                     .flatMap { users -> stateSubject.take(1).map { it.copy(users = users) } }
                     .compose(skipErrorAndNotify())
                     .subscribe(stateSubject)
