@@ -1,1 +1,1 @@
-include ':repositorySample', ':repositoryCore'
+include ':repositorySample', ':repositoryCore', ':repositoryMemory'

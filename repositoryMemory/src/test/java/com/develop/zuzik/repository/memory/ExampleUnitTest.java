@@ -1,4 +1,4 @@
-package com.develop.zuzik.repository.core;
+package com.develop.zuzik.repository.memory;
 
 import org.junit.Test;
 
