@@ -6,7 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.develop.zuzik.repository.R
-import com.develop.zuzik.repository.sample.application.application
+import com.develop.zuzik.repository.sample.application.app
 import com.develop.zuzik.repository.sample.domain.filter.Filter
 import com.jakewharton.rxbinding.widget.RxTextView
 import kotlinx.android.synthetic.main.fragment_filter.*
@@ -27,7 +27,7 @@ class FilterFragment : Fragment() {
 
     override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val filterModel = context.application.filterModel
+        val filterModel = context.app.filterModel
         val nameObservable: Observable<String?> = RxTextView
                 .textChanges(name)
                 .map { it.toString() }

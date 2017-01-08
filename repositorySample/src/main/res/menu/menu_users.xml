@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/menuItemAddUser"
+        android:title="Add random user"
+        app:showAsAction="ifRoom"/>
+
+    <item
+        android:id="@+id/menuItemRemoveUser"
+        android:title="Remove user"
+        app:showAsAction="ifRoom"/>
+
+    <item
+        android:id="@+id/menuItemRefreshUsers"
+        android:title="Refresh users"
+        app:showAsAction="ifRoom"/>
+</menu>

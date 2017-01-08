@@ -8,5 +8,5 @@ import android.content.ContextWrapper
  * Date: 1/8/17
  */
 
-val Context.application: App
+val Context.app: App
     get() = ContextWrapper(this).applicationContext as App

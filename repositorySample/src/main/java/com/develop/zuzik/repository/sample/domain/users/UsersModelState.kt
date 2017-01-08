@@ -1,9 +1,12 @@
 package com.develop.zuzik.repository.sample.domain.users
 
 import com.develop.zuzik.repository.sample.domain.entity.User
+import com.develop.zuzik.repository.sample.domain.filter.Filter
 
 /**
  * User: zuzik
  * Date: 1/8/17
  */
-data class UsersModelState(val users: List<User>)
+data class UsersModelState(
+        val users: List<User>,
+        val filter: Filter)

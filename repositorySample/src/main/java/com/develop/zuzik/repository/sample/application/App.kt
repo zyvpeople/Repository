@@ -1,6 +1,7 @@
 package com.develop.zuzik.repository.sample.application
 
 import android.app.Application
+import com.develop.zuzik.repository.sample.datasource.repository.user.UserMemoryRepository
 import com.develop.zuzik.repository.sample.domain.filter.Filter
 import com.develop.zuzik.repository.sample.domain.filter.FilterModel
 import com.develop.zuzik.repository.sample.domain.users.UsersModel
@@ -12,11 +13,13 @@ import com.develop.zuzik.repository.sample.domain.users.UsersModelState
  */
 class App : Application() {
 
-    val filterModel = FilterModel(Filter(null, null))
-    val usersModel = UsersModel(UsersModelState(emptyList()))
+    val filter = Filter(null, null)
+    val userRepository = UserMemoryRepository()
+    val filterModel = FilterModel(filter)
+    val usersModel = UsersModel(UsersModelState(emptyList(), filter), userRepository)
 
     override fun onCreate() {
         super.onCreate()
-        usersModel.updateWithFilter(filterModel.stateObservable)
+        usersModel.updateWithFilterIntent(filterModel.stateObservable)
     }
 }
