@@ -3,7 +3,7 @@ package com.develop.zuzik.repository.sample.presentation
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.app.AppCompatActivity
-import android.util.Log
+import android.widget.Toast
 import com.develop.zuzik.repository.R
 import com.develop.zuzik.repository.sample.application.app
 import com.develop.zuzik.repository.sample.domain.entity_factory.RandomUserFactory
@@ -34,7 +34,7 @@ class MainActivity : AppCompatActivity() {
                 .flatMap { Observable.just(RandomUserFactory().create()) }
 
         subscriptionList.add(usersModel.updateWithAddUserIntent(addUser))
-        subscriptionList.add(usersModel.errorObservable.subscribe { Log.i("MainActivity", it.toString()) })
+        subscriptionList.add(usersModel.errorObservable.subscribe { Toast.makeText(this, it.toString(), Toast.LENGTH_SHORT).show() })
     }
 
     private fun addFragment(placeholder: Int, createFragment: () -> Fragment) {

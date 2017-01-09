@@ -1,6 +1,7 @@
 package com.develop.zuzik.repository.sample.application
 
 import android.app.Application
+import com.develop.zuzik.repository.sample.datasource.repository.user.UserFilterMemoryPredicateParameterFactory
 import com.develop.zuzik.repository.sample.datasource.repository.user.UserMemoryRepository
 import com.develop.zuzik.repository.sample.domain.filter.Filter
 import com.develop.zuzik.repository.sample.domain.filter.FilterModel
@@ -16,7 +17,7 @@ class App : Application() {
     val filter = Filter(null, null)
     val userRepository = UserMemoryRepository()
     val filterModel = FilterModel(filter)
-    val usersModel = UsersModel(UsersModelState(emptyList(), filter), userRepository)
+    val usersModel = UsersModel(UsersModelState(emptyList()), userRepository, UserFilterMemoryPredicateParameterFactory())
 
     override fun onCreate() {
         super.onCreate()
