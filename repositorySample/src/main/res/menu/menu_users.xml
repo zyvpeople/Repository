@@ -12,8 +12,4 @@
         android:title="Remove user"
         app:showAsAction="ifRoom"/>
 
-    <item
-        android:id="@+id/menuItemRefreshUsers"
-        android:title="Refresh users"
-        app:showAsAction="ifRoom"/>
 </menu>

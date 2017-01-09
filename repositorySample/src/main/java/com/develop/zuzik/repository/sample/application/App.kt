@@ -17,10 +17,13 @@ class App : Application() {
     val filter = Filter(null, null)
     val userRepository = UserMemoryRepository()
     val filterModel = FilterModel(filter)
-    val usersModel = UsersModel(UsersModelState(emptyList()), userRepository, UserFilterMemoryPredicateParameterFactory())
+    val usersModel = UsersModel(UsersModelState(emptyList()), userRepository)
 
     override fun onCreate() {
         super.onCreate()
-        usersModel.updateWithFilterIntent(filterModel.stateObservable)
+        usersModel
+                .filter(filterModel
+                        .stateObservable
+                        .map { UserFilterMemoryPredicateParameterFactory().create(it) })
     }
 }
