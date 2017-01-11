@@ -1,6 +1,6 @@
-package com.develop.zuzik.repository.core.key_generator
+package com.develop.zuzik.repository.memory.key_generator
 
-import com.develop.zuzik.repository.core.KeyGenerator
+import com.develop.zuzik.repository.memory.KeyGenerator
 import com.develop.zuzik.repository.core.exception.GenerateKeyException
 
 /**

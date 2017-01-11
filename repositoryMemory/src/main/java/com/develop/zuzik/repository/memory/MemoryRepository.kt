@@ -1,6 +1,6 @@
 package com.develop.zuzik.repository.memory
 
-import com.develop.zuzik.repository.core.KeyGenerator
+import com.develop.zuzik.repository.memory.KeyGenerator
 import com.develop.zuzik.repository.core.Predicate
 import com.develop.zuzik.repository.core.Repository
 import com.develop.zuzik.repository.core.exception.*
@@ -15,6 +15,9 @@ open class MemoryRepository<Entity, in Key>(
         private val setKey: (Entity, Key) -> Entity,
         private val copy: (Entity) -> Entity) : Repository<Entity, Key> {
 
+    //TODO: wrap working with entities:
+    // 1) allow add additional methods for subclasses
+    // 2) notify listeners about repository changes
     private val entities = mutableListOf<Entity>()
 
     @Throws(CreateEntityException::class)

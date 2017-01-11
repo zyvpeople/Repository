@@ -6,7 +6,6 @@ import android.support.v7.app.AppCompatActivity
 import android.widget.Toast
 import com.develop.zuzik.repository.R
 import com.develop.zuzik.repository.sample.application.app
-import com.develop.zuzik.repository.sample.datasource.repository.user.UserFilterMemoryPredicateParameterFactory
 import com.develop.zuzik.repository.sample.domain.entity_factory.RandomUserFactory
 import com.develop.zuzik.repository.sample.presentation.filter.FilterFragment
 import com.develop.zuzik.repository.sample.presentation.users.UsersFragment
@@ -24,6 +23,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         val filterModel = app.filterModel
         val usersModel = app.usersModel
+        val userFilterPredicateParameterFactory = app.userFilterPredicateParameterFactory
 
         addFragment(R.id.filterPlaceholder) { FilterFragment() }
         addFragment(R.id.usersPlaceholder) { UsersFragment() }
@@ -37,7 +37,7 @@ class MainActivity : AppCompatActivity() {
         val removeUser = menuItem
                 .filter { it.itemId == R.id.menuItemRemoveUser }
                 .withLatestFrom(filterModel.stateObservable) { remove, filter -> filter }
-                .map { UserFilterMemoryPredicateParameterFactory().create(it) }
+                .map { userFilterPredicateParameterFactory.create(it) }
 
         subscriptionList.add(usersModel.addUser(addUser))
         subscriptionList.add(usersModel.removeUsers(removeUser))
