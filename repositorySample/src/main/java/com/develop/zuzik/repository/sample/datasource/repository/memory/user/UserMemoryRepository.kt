@@ -1,7 +1,8 @@
-package com.develop.zuzik.repository.sample.datasource.repository.user
+package com.develop.zuzik.repository.sample.datasource.repository.memory.user
 
-import com.develop.zuzik.repository.core.key_generator.LongKeyGenerator
+import com.develop.zuzik.repository.memory.key_generator.LongKeyGenerator
 import com.develop.zuzik.repository.memory.MemoryRepository
+import com.develop.zuzik.repository.sample.datasource.repository.UserRepository
 import com.develop.zuzik.repository.sample.domain.entity.User
 
 /**

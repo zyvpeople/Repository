@@ -2,7 +2,7 @@ package com.develop.zuzik.repository.sample.domain.users
 
 import com.develop.zuzik.repository.core.Predicate
 import com.develop.zuzik.repository.rx.RxRepository
-import com.develop.zuzik.repository.sample.datasource.repository.user.UserRepository
+import com.develop.zuzik.repository.sample.datasource.repository.UserRepository
 import com.develop.zuzik.repository.sample.domain.entity.User
 import rx.Observable
 import rx.Observable.combineLatest
@@ -59,6 +59,6 @@ class UsersModel(state: UsersModelState,
     private fun <T> skipErrorAndNotify(): (Observable<T>) -> Observable<T> = {
         it
                 .doOnError { errorSubject.onNext(it) }
-                .onErrorResumeNext { empty() }
+                .retry()
     }
 }

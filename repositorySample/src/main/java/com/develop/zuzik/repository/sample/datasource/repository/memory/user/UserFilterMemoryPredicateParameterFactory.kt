@@ -1,4 +1,4 @@
-package com.develop.zuzik.repository.sample.datasource.repository.user
+package com.develop.zuzik.repository.sample.datasource.repository.memory.user
 
 import com.develop.zuzik.repository.core.Predicate
 import com.develop.zuzik.repository.core.PredicateParameterFactory
