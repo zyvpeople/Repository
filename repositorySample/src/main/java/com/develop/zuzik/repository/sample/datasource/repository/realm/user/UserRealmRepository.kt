@@ -13,7 +13,8 @@ import io.realm.Realm
 class UserRealmRepository(realm: Realm) : RealmRepository<User, Long, UserRealmObject>(
         realm,
         UserRealmObject::class.java,
-        LongKeyGenerator<UserRealmObject>("id"),
+        { query, id -> query.equalTo("id", id) },
+        LongKeyGenerator <UserRealmObject>("id"),
         User::id,
         {
             val userRealmObject = UserRealmObject()

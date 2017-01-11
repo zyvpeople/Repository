@@ -3,9 +3,13 @@ package com.develop.zuzik.repository.realm
 import com.develop.zuzik.repository.core.Predicate
 import com.develop.zuzik.repository.core.Repository
 import com.develop.zuzik.repository.core.exception.CreateEntityException
+import com.develop.zuzik.repository.core.exception.DeleteEntityException
 import com.develop.zuzik.repository.core.exception.ReadEntityException
+import com.develop.zuzik.repository.core.exception.UpdateEntityException
 import io.realm.Realm
 import io.realm.RealmModel
+import io.realm.RealmObject
+import io.realm.RealmQuery
 
 /**
  * User: zuzik
@@ -14,6 +18,7 @@ import io.realm.RealmModel
 open class RealmRepository<Entity, in Key, RealmEntity : RealmModel>(
         private val realm: Realm,
         private val realmEntityClass: Class<RealmEntity>,
+        private val keyWhereQuery: (RealmQuery<RealmEntity>, key: Key) -> RealmQuery<RealmEntity>,
         private val keyGenerator: KeyGenerator<Key, RealmEntity>,
         private val getKey: (Entity) -> Key?,
         private val entityToRealmEntity: (Entity) -> RealmEntity,
@@ -40,8 +45,18 @@ open class RealmRepository<Entity, in Key, RealmEntity : RealmModel>(
         }
     }
 
+    @Throws(ReadEntityException::class)
     override fun readWithKey(key: Key): Entity {
-        throw UnsupportedOperationException("not implemented") //To change body of created functions use File | Settings | File Templates.
+        try {
+            val entity = keyWhereQuery(realm.where(realmEntityClass), key).findFirst()
+            return if (entity != null) {
+                realmEntityToEntity(entity)
+            } else {
+                throw ReadEntityException()
+            }
+        } catch (e: Exception) {
+            throw ReadEntityException()
+        }
     }
 
     @Throws(ReadEntityException::class)
@@ -50,28 +65,54 @@ open class RealmRepository<Entity, in Key, RealmEntity : RealmModel>(
             val realmPredicate = predicate as RealmPredicate<Entity, RealmEntity>
             val result = realmPredicate.where(realm.where(realmEntityClass)).findAll()
             return result.map { realmEntityToEntity(it) }
-        } catch (e: ClassCastException) {
+        } catch (e: Exception) {
             throw ReadEntityException()
         }
     }
 
+    @Throws(ReadEntityException::class)
     override fun readAll(): List<Entity> {
-        throw UnsupportedOperationException("not implemented") //To change body of created functions use File | Settings | File Templates.
+        try {
+            return realm.where(realmEntityClass).findAll().map { realmEntityToEntity(it) }
+        } catch (e: Exception) {
+            throw ReadEntityException()
+        }
     }
 
+    @Throws(UpdateEntityException::class)
     override fun update(entity: Entity): Entity {
-        throw UnsupportedOperationException("not implemented") //To change body of created functions use File | Settings | File Templates.
+        try {
+            //TODO: check if id exist and entity with id exist
+            val realmEntity = realm.copyToRealmOrUpdate(entityToRealmEntity(entity))
+            return realmEntityToEntity(realmEntity)
+        } catch (e: Exception) {
+            throw UpdateEntityException()
+        }
     }
 
+    @Throws(DeleteEntityException::class)
     override fun delete(entity: Entity) {
-        throw UnsupportedOperationException("not implemented") //To change body of created functions use File | Settings | File Templates.
+        deleteWithKey(getKey(entity) ?: throw DeleteEntityException())
     }
 
+    @Throws(DeleteEntityException::class)
     override fun deleteWithKey(key: Key) {
-        throw UnsupportedOperationException("not implemented") //To change body of created functions use File | Settings | File Templates.
+        try {
+            val realmEntity = keyWhereQuery(realm.where(realmEntityClass), key).findFirst() ?: throw DeleteEntityException()
+            realm.executeTransaction { RealmObject.deleteFromRealm(realmEntity) }
+        } catch (e: Exception) {
+            throw DeleteEntityException()
+        }
     }
 
+    @Throws(DeleteEntityException::class)
     override fun deleteWithPredicate(predicate: Predicate<Entity>) {
-        throw UnsupportedOperationException("not implemented") //To change body of created functions use File | Settings | File Templates.
+        try {
+            val realmPredicate = predicate as RealmPredicate<Entity, RealmEntity>
+            val entities = realmPredicate.where(realm.where(realmEntityClass)).findAll()
+            realm.executeTransaction { entities.deleteAllFromRealm() }
+        } catch (e: Exception) {
+            throw DeleteEntityException()
+        }
     }
 }
