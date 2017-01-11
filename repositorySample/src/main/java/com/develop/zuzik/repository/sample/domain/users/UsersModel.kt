@@ -59,6 +59,6 @@ class UsersModel(state: UsersModelState,
     private fun <T> skipErrorAndNotify(): (Observable<T>) -> Observable<T> = {
         it
                 .doOnError { errorSubject.onNext(it) }
-                .onErrorResumeNext { empty() }
+                .retry()
     }
 }

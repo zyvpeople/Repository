@@ -1,6 +1,5 @@
 package com.develop.zuzik.repository.memory
 
-import com.develop.zuzik.repository.memory.KeyGenerator
 import com.develop.zuzik.repository.core.Predicate
 import com.develop.zuzik.repository.core.Repository
 import com.develop.zuzik.repository.core.exception.*
