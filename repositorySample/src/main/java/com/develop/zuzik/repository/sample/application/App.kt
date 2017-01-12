@@ -2,8 +2,13 @@ package com.develop.zuzik.repository.sample.application
 
 import android.app.Application
 import android.content.Context
+import com.activeandroid.ActiveAndroid
+import com.activeandroid.Configuration
 import com.develop.zuzik.repository.core.PredicateParameterFactory
 import com.develop.zuzik.repository.sample.datasource.repository.UserRepository
+import com.develop.zuzik.repository.sample.datasource.repository.activeandroid.user.UserActiveAndroidModel
+import com.develop.zuzik.repository.sample.datasource.repository.activeandroid.user.UserActiveAndroidRepository
+import com.develop.zuzik.repository.sample.datasource.repository.activeandroid.user.UserFilterActiveAndroidPredicateParameterFactory
 import com.develop.zuzik.repository.sample.datasource.repository.memory.user.UserFilterMemoryPredicateParameterFactory
 import com.develop.zuzik.repository.sample.datasource.repository.memory.user.UserMemoryRepository
 import com.develop.zuzik.repository.sample.datasource.repository.ormlite.OrmliteHelper
@@ -33,10 +38,11 @@ class App : Application() {
     private enum class RepositoryType {
         MEMORY,
         REALM,
-        ORMLITE
+        ORMLITE,
+        ACTIVE_ANDROID
     }
 
-    private val repositoryType = RepositoryType.ORMLITE
+    private val repositoryType = RepositoryType.ACTIVE_ANDROID
 
     private val filter = Filter(null, null)
     val filterModel: FilterModel = FilterModel(filter)
@@ -67,6 +73,7 @@ class App : Application() {
                 App.RepositoryType.MEMORY -> MemoryRepositoryConfiguration()
                 App.RepositoryType.REALM -> RealmRepositoryConfiguration(context)
                 App.RepositoryType.ORMLITE -> OrmliteRepositoryConfiguration(context)
+                App.RepositoryType.ACTIVE_ANDROID -> ActiveAndroidRepositoryConfiguration(context)
             }
 
     private interface RepositoryConfiguration {
@@ -101,5 +108,21 @@ class App : Application() {
         override fun createUserRepository() = UserOrmliteRepository(ormliteHelper.getDao(UserOrmliteEntity::class.java))
 
         override fun createUserFilterPredicateFactory() = UserFilterOrmlitePredicateParameterFactory()
+    }
+
+    private class ActiveAndroidRepositoryConfiguration(context: Context) : RepositoryConfiguration {
+
+        init {
+            val databaseConfiguration = Configuration.Builder(context)
+                    .setDatabaseName("activeandroid.db")
+                    .setDatabaseVersion(1)
+                    .addModelClass(UserActiveAndroidModel::class.java)
+                    .create()
+            ActiveAndroid.initialize(databaseConfiguration)
+        }
+
+        override fun createUserRepository() = UserActiveAndroidRepository()
+
+        override fun createUserFilterPredicateFactory() = UserFilterActiveAndroidPredicateParameterFactory()
     }
 }
