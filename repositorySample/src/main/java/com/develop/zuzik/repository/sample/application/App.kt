@@ -6,6 +6,10 @@ import com.develop.zuzik.repository.core.PredicateParameterFactory
 import com.develop.zuzik.repository.sample.datasource.repository.UserRepository
 import com.develop.zuzik.repository.sample.datasource.repository.memory.user.UserFilterMemoryPredicateParameterFactory
 import com.develop.zuzik.repository.sample.datasource.repository.memory.user.UserMemoryRepository
+import com.develop.zuzik.repository.sample.datasource.repository.ormlite.OrmliteHelper
+import com.develop.zuzik.repository.sample.datasource.repository.ormlite.user.UserFilterOrmlitePredicateParameterFactory
+import com.develop.zuzik.repository.sample.datasource.repository.ormlite.user.UserOrmliteEntity
+import com.develop.zuzik.repository.sample.datasource.repository.ormlite.user.UserOrmliteRepository
 import com.develop.zuzik.repository.sample.datasource.repository.realm.RealmModule
 import com.develop.zuzik.repository.sample.datasource.repository.realm.user.UserFilterRealmPredicateParameterFactory
 import com.develop.zuzik.repository.sample.datasource.repository.realm.user.UserRealmRepository
@@ -14,6 +18,8 @@ import com.develop.zuzik.repository.sample.domain.filter.Filter
 import com.develop.zuzik.repository.sample.domain.filter.FilterModel
 import com.develop.zuzik.repository.sample.domain.users.UsersModel
 import com.develop.zuzik.repository.sample.domain.users.UsersModelState
+import com.j256.ormlite.android.apptools.OpenHelperManager
+import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper
 import io.realm.Realm
 import io.realm.RealmConfiguration
 
@@ -23,6 +29,14 @@ import io.realm.RealmConfiguration
  */
 //FIXME: when device does not have memory - app crashes when tries to init realm - database cant be created
 class App : Application() {
+
+    private enum class RepositoryType {
+        MEMORY,
+        REALM,
+        ORMLITE
+    }
+
+    private val repositoryType = RepositoryType.ORMLITE
 
     private val filter = Filter(null, null)
     val filterModel: FilterModel = FilterModel(filter)
@@ -36,8 +50,7 @@ class App : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        repositoryConfiguration = repositoryConfiguration()
-        repositoryConfiguration.init(this)
+        repositoryConfiguration = repositoryConfiguration(this)
 
         userRepository = repositoryConfiguration.createUserRepository()
         userFilterPredicateParameterFactory = repositoryConfiguration.createUserFilterPredicateFactory()
@@ -49,37 +62,44 @@ class App : Application() {
                         .map { userFilterPredicateParameterFactory.create(it) })
     }
 
-    private fun repositoryConfiguration(): RepositoryConfiguration {
-        val realm = true
-        return if (realm) {
-            RealmRepositoryConfiguration()
-        } else {
-            MemoryRepositoryConfiguration()
-        }
-    }
+    private fun repositoryConfiguration(context: Context): RepositoryConfiguration =
+            when (repositoryType) {
+                App.RepositoryType.MEMORY -> MemoryRepositoryConfiguration()
+                App.RepositoryType.REALM -> RealmRepositoryConfiguration(context)
+                App.RepositoryType.ORMLITE -> OrmliteRepositoryConfiguration(context)
+            }
 
     private interface RepositoryConfiguration {
-        fun init(context: Context)
         fun createUserRepository(): UserRepository
         fun createUserFilterPredicateFactory(): PredicateParameterFactory<User, Filter>
     }
 
     private class MemoryRepositoryConfiguration : RepositoryConfiguration {
-        override fun init(context: Context) {
-        }
 
         override fun createUserRepository() = UserMemoryRepository()
 
         override fun createUserFilterPredicateFactory() = UserFilterMemoryPredicateParameterFactory()
     }
 
-    private class RealmRepositoryConfiguration : RepositoryConfiguration {
-        override fun init(context: Context) {
+    private class RealmRepositoryConfiguration(context: Context) : RepositoryConfiguration {
+
+        private val realm: Realm = Realm.getInstance(RealmConfiguration.Builder().modules(RealmModule()).build())
+
+        init {
             Realm.init(context)
         }
 
-        override fun createUserRepository() = UserRealmRepository(Realm.getInstance(RealmConfiguration.Builder().modules(RealmModule()).build()))
+        override fun createUserRepository() = UserRealmRepository(realm)
 
         override fun createUserFilterPredicateFactory() = UserFilterRealmPredicateParameterFactory()
+    }
+
+    private class OrmliteRepositoryConfiguration(context: Context) : RepositoryConfiguration {
+
+        private val ormliteHelper: OrmLiteSqliteOpenHelper = OpenHelperManager.getHelper(context, OrmliteHelper::class.java)
+
+        override fun createUserRepository() = UserOrmliteRepository(ormliteHelper.getDao(UserOrmliteEntity::class.java))
+
+        override fun createUserFilterPredicateFactory() = UserFilterOrmlitePredicateParameterFactory()
     }
 }
