@@ -6,7 +6,7 @@ import com.develop.zuzik.repository.core.PredicateParameterFactory
 import com.develop.zuzik.repository.sample.datasource.repository.UserRepository
 import com.develop.zuzik.repository.sample.datasource.repository.memory.user.UserFilterMemoryPredicateParameterFactory
 import com.develop.zuzik.repository.sample.datasource.repository.memory.user.UserMemoryRepository
-import com.develop.zuzik.repository.sample.datasource.repository.ormlite.user.OrmliteHelper
+import com.develop.zuzik.repository.sample.datasource.repository.ormlite.OrmliteHelper
 import com.develop.zuzik.repository.sample.datasource.repository.ormlite.user.UserFilterOrmlitePredicateParameterFactory
 import com.develop.zuzik.repository.sample.datasource.repository.ormlite.user.UserOrmliteEntity
 import com.develop.zuzik.repository.sample.datasource.repository.ormlite.user.UserOrmliteRepository
@@ -64,9 +64,9 @@ class App : Application() {
 
     private fun repositoryConfiguration(context: Context): RepositoryConfiguration =
             when (repositoryType) {
-                App.RepositoryType.MEMORY -> OrmliteRepositoryConfiguration(context)
+                App.RepositoryType.MEMORY -> MemoryRepositoryConfiguration()
                 App.RepositoryType.REALM -> RealmRepositoryConfiguration(context)
-                App.RepositoryType.ORMLITE -> MemoryRepositoryConfiguration()
+                App.RepositoryType.ORMLITE -> OrmliteRepositoryConfiguration(context)
             }
 
     private interface RepositoryConfiguration {
@@ -96,11 +96,7 @@ class App : Application() {
 
     private class OrmliteRepositoryConfiguration(context: Context) : RepositoryConfiguration {
 
-        private val ormliteHelper: OrmLiteSqliteOpenHelper
-
-        init {
-            ormliteHelper = OpenHelperManager.getHelper(context, OrmliteHelper::class.java)
-        }
+        private val ormliteHelper: OrmLiteSqliteOpenHelper = OpenHelperManager.getHelper(context, OrmliteHelper::class.java)
 
         override fun createUserRepository() = UserOrmliteRepository(ormliteHelper.getDao(UserOrmliteEntity::class.java))
 

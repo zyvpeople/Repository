@@ -24,4 +24,7 @@ class UserOrmliteRepository(dao: Dao<UserOrmliteEntity, Long>) : OrmliteReposito
                     id = if (it.id != 0L) it.id else null,
                     name = it.name,
                     age = it.age)
+        },
+        {
+            it.copy()
         }), UserRepository

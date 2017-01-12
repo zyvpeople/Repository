@@ -1,7 +1,8 @@
-package com.develop.zuzik.repository.sample.datasource.repository.ormlite.user
+package com.develop.zuzik.repository.sample.datasource.repository.ormlite
 
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
+import com.develop.zuzik.repository.sample.datasource.repository.ormlite.user.UserOrmliteEntity
 import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper
 import com.j256.ormlite.support.ConnectionSource
 import com.j256.ormlite.table.TableUtils
@@ -13,7 +14,7 @@ import com.j256.ormlite.table.TableUtils
 class OrmliteHelper(context: Context) : OrmLiteSqliteOpenHelper(context, "ormlitedatabase", null, 1) {
 
     override fun onCreate(database: SQLiteDatabase?, connectionSource: ConnectionSource?) {
-        TableUtils.clearTable(connectionSource, UserOrmliteEntity::class.java)
+        TableUtils.createTable(connectionSource, UserOrmliteEntity::class.java)
     }
 
     override fun onUpgrade(database: SQLiteDatabase?, connectionSource: ConnectionSource?, oldVersion: Int, newVersion: Int) {

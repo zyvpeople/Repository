@@ -11,16 +11,20 @@ import com.j256.ormlite.stmt.Where
  * Date: 1/11/17
  */
 class UserFilterOrmlitePredicate(private val filter: Filter) : OrmlitePredicate<User, Long, UserRealmObject> {
-    override fun where(where: Where<UserRealmObject, Long>): Where<UserRealmObject, Long> {
-        if (filter.name != null) {
+    override fun where(where: Where<UserRealmObject, Long>): Where<UserRealmObject, Long>? {
+        val hasName = filter.name != null
+        val hasAge = filter.age != null
+
+        if (hasName) {
             where.like("name", "%${filter.name}%")
         }
-        if (filter.age != null) {
-            if (filter.name != null) {
+        if (hasAge) {
+            if (hasName) {
                 where.and()
             }
             where.eq("age", filter.age)
         }
-        return where
+
+        return if (hasName || hasAge) where else null
     }
 }

@@ -3,7 +3,9 @@ package com.develop.zuzik.repository.ormlite
 import com.develop.zuzik.repository.core.Predicate
 import com.develop.zuzik.repository.core.Repository
 import com.develop.zuzik.repository.core.exception.CreateEntityException
+import com.develop.zuzik.repository.core.exception.DeleteEntityException
 import com.develop.zuzik.repository.core.exception.ReadEntityException
+import com.develop.zuzik.repository.core.exception.UpdateEntityException
 import com.j256.ormlite.dao.Dao
 
 /**
@@ -14,7 +16,8 @@ open class OrmliteRepository<Entity, in Key, OrmliteEntity>(
         private val dao: Dao<OrmliteEntity, Key>,
         private val getKey: (Entity) -> Key?,
         private val entityToOrmliteEntity: (Entity) -> OrmliteEntity,
-        private val ormliteEntityToEntity: (OrmliteEntity) -> Entity
+        private val ormliteEntityToEntity: (OrmliteEntity) -> Entity,
+        private val copy: (Entity) -> Entity
 ) : Repository<Entity, Key> {
 
     @Throws(CreateEntityException::class)
@@ -46,30 +49,56 @@ open class OrmliteRepository<Entity, in Key, OrmliteEntity>(
         try {
             val ormlitePredicate = predicate as OrmlitePredicate<Entity, Key, OrmliteEntity>
             val queryBuilder = dao.queryBuilder()
-            val where = ormlitePredicate.where(queryBuilder.where())
+            queryBuilder.setWhere(ormlitePredicate.where(queryBuilder.where()))
             return queryBuilder.query().map { ormliteEntityToEntity(it) }
         } catch (e: Exception) {
             throw ReadEntityException()
         }
     }
 
+    @Throws(ReadEntityException::class)
     override fun readAll(): List<Entity> {
-        throw UnsupportedOperationException("not implemented") //To change body of created functions use File | Settings | File Templates.
+        try {
+            return dao.queryForAll().map { ormliteEntityToEntity(it) }
+        } catch (e: Exception) {
+            throw ReadEntityException()
+        }
     }
 
+    @Throws(UpdateEntityException::class)
     override fun update(entity: Entity): Entity {
-        throw UnsupportedOperationException("not implemented") //To change body of created functions use File | Settings | File Templates.
+        try {
+            //TODO: check if id exist and entity with id exist
+            dao.update(entityToOrmliteEntity(entity))
+            return copy(entity)
+        } catch (e: Exception) {
+            throw UpdateEntityException()
+        }
     }
 
+    @Throws(DeleteEntityException::class)
     override fun delete(entity: Entity) {
-        throw UnsupportedOperationException("not implemented") //To change body of created functions use File | Settings | File Templates.
+        deleteWithKey(getKey(entity) ?: throw DeleteEntityException())
     }
 
+    @Throws(DeleteEntityException::class)
     override fun deleteWithKey(key: Key) {
-        throw UnsupportedOperationException("not implemented") //To change body of created functions use File | Settings | File Templates.
+        try {
+            dao.deleteById(key)
+        } catch (e: Exception) {
+            throw DeleteEntityException()
+        }
     }
 
+    @Throws(DeleteEntityException::class)
     override fun deleteWithPredicate(predicate: Predicate<Entity>) {
-        throw UnsupportedOperationException("not implemented") //To change body of created functions use File | Settings | File Templates.
+        try {
+            val ormlitePredicate = predicate as OrmlitePredicate<Entity, Key, OrmliteEntity>
+            val deleteBuilder = dao.deleteBuilder()
+            deleteBuilder.setWhere(ormlitePredicate.where(deleteBuilder.where()))
+            deleteBuilder.delete()
+        } catch (e: Exception) {
+            throw DeleteEntityException()
+        }
     }
 }
