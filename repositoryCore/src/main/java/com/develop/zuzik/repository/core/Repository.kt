@@ -9,7 +9,7 @@ import com.develop.zuzik.repository.core.exception.UpdateEntityException
  * User: zuzik
  * Date: 1/7/17
  */
-//TODO: add methods: deleteEntities, updateEntities, createEntities
+//TODO: add methods: deleteEntities, updateEntities, createEntities, createOrUpdate, addRepositoryChangedListener, removeRepositoryChangedListener
 interface Repository<Entity, in Key> {
     @Throws(CreateEntityException::class)
     fun create(entity: Entity): Entity
