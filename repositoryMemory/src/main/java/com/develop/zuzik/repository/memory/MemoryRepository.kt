@@ -38,7 +38,7 @@ open class MemoryRepository<Entity, in Key>(
     @Throws(ReadEntityException::class)
     override fun readWithKey(key: Key): Entity {
         val entityWithKey = entities.firstOrNull { getKey(it) == key }
-        return entityWithKey ?: throw ReadEntityException()
+        return copy(entityWithKey ?: throw ReadEntityException())
     }
 
     @Throws(ReadEntityException::class)

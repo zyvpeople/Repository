@@ -29,7 +29,6 @@ class MainActivity : AppCompatActivity() {
         addFragment(R.id.usersPlaceholder) { UsersFragment() }
 
         toolbar.inflateMenu(R.menu.menu_users)
-
         val menuItem = RxToolbar.itemClicks(toolbar).share()
         val addUser = menuItem
                 .filter { it.itemId == R.id.menuItemAddUser }
