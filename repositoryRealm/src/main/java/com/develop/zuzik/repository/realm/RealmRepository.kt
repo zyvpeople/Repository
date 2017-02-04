@@ -82,11 +82,23 @@ open class RealmRepository<Entity, in Key, RealmEntity : RealmModel>(
     @Throws(UpdateEntityException::class)
     override fun update(entity: Entity): Entity {
         try {
-            //TODO: check if id exist and entity with id exist
-            val realmEntity = realm.copyToRealmOrUpdate(entityToRealmEntity(entity))
-            return realmEntityToEntity(realmEntity)
+            val key = getKey(entity)
+            if (key == null) {
+                throw UpdateEntityException()
+            }
+            val existedEntity = readWithKey(key)
+
+            var realmEntity: RealmEntity? = null
+            realm.executeTransaction {
+                realmEntity = it.copyToRealmOrUpdate(entityToRealmEntity(entity)) }
+            return realmEntityToEntity(realmEntity ?: throw UpdateEntityException())
         } catch (e: Exception) {
-            throw UpdateEntityException()
+            val message = e.message
+            if (message != null) {
+                throw UpdateEntityException(message)
+            } else {
+                throw UpdateEntityException()
+            }
         }
     }
 

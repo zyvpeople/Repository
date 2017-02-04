@@ -38,4 +38,6 @@ class UserRepositoryAssertStrategy(private val createRepository: () -> Repositor
 
     override fun entityWithKeyPredicate(key: Long): Predicate<User> = entityWithKeyPredicateFactory(key)
 
+    override fun updateProperties(entity: User) = entity.copy(name = "updated name")
+
 }
