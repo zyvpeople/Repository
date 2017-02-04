@@ -10,8 +10,6 @@ import org.junit.Assert
  * User: zuzik
  * Date: 1/12/17
  */
-//TODO: all fails should have message
-//TODO: if check empty array check for size but not isEmpty
 class RepositoryAssert<Entity, Key>(private val strategy: RepositoryAssertStrategy<Entity, Key>) : Assert() {
 
     fun assertRepositoryBehaviour() {
@@ -43,7 +41,7 @@ class RepositoryAssert<Entity, Key>(private val strategy: RepositoryAssertStrate
 
     private fun testCreateSavesEntity() {
         val entity = strategy.createEntity()
-        val repository = strategy.repository()
+        val repository = strategy.createRepository()
 
         repository.create(entity)
 
@@ -55,19 +53,19 @@ class RepositoryAssert<Entity, Key>(private val strategy: RepositoryAssertStrate
 
     private fun testCreateDoesNotModifyEntityThatPassedAsArgument() {
         val entity = strategy.createEntity()
-        strategy.repository().create(entity)
+        strategy.createRepository().create(entity)
         assertFalse(strategy.hasKey(entity))
     }
 
     private fun testCreateReturnsNotSameEntity() {
         val entity = strategy.createEntity()
-        val createdEntity = strategy.repository().create(entity)
+        val createdEntity = strategy.createRepository().create(entity)
         assertNotSame(createdEntity, entity)
     }
 
     private fun testCreateSetsKeyToReturnedEntity() {
         val entity = strategy.createEntity()
-        val createdEntity = strategy.repository().create(entity)
+        val createdEntity = strategy.createRepository().create(entity)
         val expectedKey = strategy.key1()
         val resultKey = strategy.getKey(createdEntity)
         assertEquals(expectedKey, resultKey)
@@ -75,7 +73,7 @@ class RepositoryAssert<Entity, Key>(private val strategy: RepositoryAssertStrate
 
     private fun testCreateReturnsEqualEntityButWithId() {
         val entity = strategy.createEntity()
-        val createdEntity = strategy.repository().create(entity)
+        val createdEntity = strategy.createRepository().create(entity)
         val expectedEntity = strategy.setKey(entity, strategy.getKey(createdEntity))
         assertEquals(expectedEntity, createdEntity)
     }
@@ -84,8 +82,8 @@ class RepositoryAssert<Entity, Key>(private val strategy: RepositoryAssertStrate
         try {
             val entity = strategy.createEntity()
             val entityWithKey = strategy.setKey(entity, strategy.key1())
-            strategy.repository().create(entityWithKey)
-            fail()
+            strategy.createRepository().create(entityWithKey)
+            fail("${CreateEntityException::class.simpleName} is expected")
         } catch (e: CreateEntityException) {
             assertTrue(true)
         }
@@ -103,7 +101,7 @@ class RepositoryAssert<Entity, Key>(private val strategy: RepositoryAssertStrate
 
     private fun testReadWithKeyReturnsEntityWithKey() {
         val entity = strategy.createEntity()
-        val repository = strategy.repository()
+        val repository = strategy.createRepository()
         repository.create(entity)
         val savedEntity = strategy.setKey(entity, strategy.key1())
 
@@ -114,7 +112,7 @@ class RepositoryAssert<Entity, Key>(private val strategy: RepositoryAssertStrate
 
     private fun testReadWithKeyReturnsCopyOfEntity() {
         val entity = strategy.createEntity()
-        val repository = strategy.repository()
+        val repository = strategy.createRepository()
         repository.create(entity)
 
         val readEntity1 = repository.readWithKey(strategy.key1())
@@ -125,12 +123,12 @@ class RepositoryAssert<Entity, Key>(private val strategy: RepositoryAssertStrate
 
     private fun testReadWithKeyThrowsReadEntityExceptionWhenEntityWithKeyDoesNotExist() {
         val entity = strategy.createEntity()
-        val repository = strategy.repository()
+        val repository = strategy.createRepository()
         repository.create(entity)
 
         try {
-            repository.readWithKey(strategy.notExistedKey())
-            fail()
+            repository.readWithKey(strategy.key2())
+            fail("${ReadEntityException::class.simpleName} is expected")
         } catch (e: ReadEntityException) {
             assertTrue(true)
         }
@@ -143,16 +141,15 @@ class RepositoryAssert<Entity, Key>(private val strategy: RepositoryAssertStrate
     private fun testReadWithPredicate() {
         execute { testReadWithPredicateReturnsCorrectEntities() }
         execute { testReadWithPredicateReturnsCopyOfEntities() }
-        execute { testReadWithPredicateReturnsEmptyListIfEntitiesDontExist() }
+        execute { testReadWithPredicateReturnsEmptyListIfEntitiesDoNotExist() }
     }
 
     private fun testReadWithPredicateReturnsCorrectEntities() {
         val entity = strategy.createEntity()
-        val repository = strategy.repository()
+        val repository = strategy.createRepository()
         repository.create(entity)
         repository.create(entity)
         val savedEntity1 = strategy.setKey(entity, strategy.key1())
-        val savedEntity2 = strategy.setKey(entity, strategy.key2())
         val expectedEntities = listOf(savedEntity1)
 
         val readEntities = repository.readWithPredicate(strategy.entityWithKeyPredicate(strategy.key1()))
@@ -162,7 +159,7 @@ class RepositoryAssert<Entity, Key>(private val strategy: RepositoryAssertStrate
 
     private fun testReadWithPredicateReturnsCopyOfEntities() {
         val entity = strategy.createEntity()
-        val repository = strategy.repository()
+        val repository = strategy.createRepository()
         repository.create(entity)
 
         val readEntities1 = repository.readWithPredicate(strategy.entityWithKeyPredicate(strategy.key1()))
@@ -172,14 +169,14 @@ class RepositoryAssert<Entity, Key>(private val strategy: RepositoryAssertStrate
         assertNotSame(readEntities1[0], readEntities2[0])
     }
 
-    private fun testReadWithPredicateReturnsEmptyListIfEntitiesDontExist() {
+    private fun testReadWithPredicateReturnsEmptyListIfEntitiesDoNotExist() {
         val entity = strategy.createEntity()
-        val repository = strategy.repository()
+        val repository = strategy.createRepository()
         repository.create(entity)
 
         val readEntities = repository.readWithPredicate(strategy.entityWithKeyPredicate(strategy.key2()))
 
-        assertTrue(readEntities.isEmpty())
+        assertEquals(0, readEntities.size)
     }
 
     //endregion
@@ -189,12 +186,12 @@ class RepositoryAssert<Entity, Key>(private val strategy: RepositoryAssertStrate
     private fun testReadAll() {
         execute { testReadAllReturnsCorrectEntities() }
         execute { testReadAllReturnsCopyOfEntities() }
-        execute { testReadAllReturnsEmptyListIfEntitiesDontExist() }
+        execute { testReadAllReturnsEmptyListIfEntitiesDoNotExist() }
     }
 
     private fun testReadAllReturnsCorrectEntities() {
         val entity = strategy.createEntity()
-        val repository = strategy.repository()
+        val repository = strategy.createRepository()
         repository.create(entity)
         repository.create(entity)
         val savedEntity1 = strategy.setKey(entity, strategy.key1())
@@ -208,7 +205,7 @@ class RepositoryAssert<Entity, Key>(private val strategy: RepositoryAssertStrate
 
     private fun testReadAllReturnsCopyOfEntities() {
         val entity = strategy.createEntity()
-        val repository = strategy.repository()
+        val repository = strategy.createRepository()
         repository.create(entity)
 
         val readEntities1 = repository.readAll()
@@ -218,12 +215,12 @@ class RepositoryAssert<Entity, Key>(private val strategy: RepositoryAssertStrate
         assertNotSame(readEntities1[0], readEntities2[0])
     }
 
-    private fun testReadAllReturnsEmptyListIfEntitiesDontExist() {
-        val repository = strategy.repository()
+    private fun testReadAllReturnsEmptyListIfEntitiesDoNotExist() {
+        val repository = strategy.createRepository()
 
         val readEntities = repository.readAll()
 
-        assertTrue(readEntities.isEmpty())
+        assertEquals(0, readEntities.size)
     }
 
     //endregion
@@ -240,7 +237,7 @@ class RepositoryAssert<Entity, Key>(private val strategy: RepositoryAssertStrate
 
     private fun testUpdateUpdatesEntity() {
         val entity = strategy.createEntity()
-        val repository = strategy.repository()
+        val repository = strategy.createRepository()
         repository.create(entity)
 
         val savedEntity = strategy.setKey(entity, strategy.key1())
@@ -255,7 +252,7 @@ class RepositoryAssert<Entity, Key>(private val strategy: RepositoryAssertStrate
 
     private fun testUpdateReturnsNotSameEntity() {
         val entity = strategy.createEntity()
-        val repository = strategy.repository()
+        val repository = strategy.createRepository()
         repository.create(entity)
 
         val savedEntity = strategy.setKey(entity, strategy.key1())
@@ -268,7 +265,7 @@ class RepositoryAssert<Entity, Key>(private val strategy: RepositoryAssertStrate
 
     private fun testUpdateReturnsEqualEntity() {
         val entity = strategy.createEntity()
-        val repository = strategy.repository()
+        val repository = strategy.createRepository()
         repository.create(entity)
 
         val savedEntity = strategy.setKey(entity, strategy.key1())
@@ -282,11 +279,11 @@ class RepositoryAssert<Entity, Key>(private val strategy: RepositoryAssertStrate
     private fun testUpdateThrowsUpdateEntityExceptionWhenPassEntityWithoutKey() {
         try {
             val entityWithoutKey = strategy.createEntity()
-            val repository = strategy.repository()
+            val repository = strategy.createRepository()
             repository.create(entityWithoutKey)
 
             repository.update(entityWithoutKey)
-            fail()
+            fail("${UpdateEntityException::class.simpleName} is expected")
         } catch (e: UpdateEntityException) {
             assertTrue(true)
         }
@@ -295,13 +292,13 @@ class RepositoryAssert<Entity, Key>(private val strategy: RepositoryAssertStrate
     private fun testUpdateThrowsUpdateEntityExceptionWhenPassEntityWithNotExistedKey() {
         try {
             val entityWithoutKey = strategy.createEntity()
-            val repository = strategy.repository()
+            val repository = strategy.createRepository()
             repository.create(entityWithoutKey)
 
             val notExistedEntity = strategy.setKey(entityWithoutKey, strategy.key2())
 
             repository.update(notExistedEntity)
-            fail()
+            fail("${UpdateEntityException::class.simpleName} is expected")
         } catch (e: UpdateEntityException) {
             assertTrue(true)
         }
@@ -319,7 +316,7 @@ class RepositoryAssert<Entity, Key>(private val strategy: RepositoryAssertStrate
 
     private fun testDeleteDeletesEntity() {
         val entity = strategy.createEntity()
-        val repository = strategy.repository()
+        val repository = strategy.createRepository()
         repository.create(entity)
         repository.create(entity)
         val savedEntity1 = strategy.setKey(entity, strategy.key1())
@@ -334,12 +331,12 @@ class RepositoryAssert<Entity, Key>(private val strategy: RepositoryAssertStrate
 
     private fun testDeleteThrowsDeleteEntityExceptionWhenEntityWithoutKey() {
         val entityWithoutKey = strategy.createEntity()
-        val repository = strategy.repository()
+        val repository = strategy.createRepository()
         repository.create(entityWithoutKey)
 
         try {
             repository.delete(entityWithoutKey)
-            fail()
+            fail("${DeleteEntityException::class.simpleName} is expected")
         } catch (e: DeleteEntityException) {
             assertTrue(true)
         }
@@ -347,14 +344,14 @@ class RepositoryAssert<Entity, Key>(private val strategy: RepositoryAssertStrate
 
     private fun testDeleteThrowsDeleteEntityExceptionWhenEntityWithKeyDoesNotExist() {
         val entityWithoutKey = strategy.createEntity()
-        val repository = strategy.repository()
+        val repository = strategy.createRepository()
         repository.create(entityWithoutKey)
 
         val notExistedEntity = strategy.setKey(strategy.createEntity(), strategy.key2())
 
         try {
             repository.delete(notExistedEntity)
-            fail()
+            fail("${DeleteEntityException::class.simpleName} is expected")
         } catch (e: DeleteEntityException) {
             assertTrue(true)
         }
@@ -371,27 +368,27 @@ class RepositoryAssert<Entity, Key>(private val strategy: RepositoryAssertStrate
 
     private fun testDeleteWithKeyDeletesEntity() {
         val entity = strategy.createEntity()
-        val repository = strategy.repository()
+        val repository = strategy.createRepository()
         repository.create(entity)
         repository.create(entity)
-        val savedEntity1 = strategy.setKey(entity, strategy.key1())
         val savedEntity2 = strategy.setKey(entity, strategy.key2())
+        val expectedEntities = listOf(savedEntity2)
 
         repository.deleteWithKey(strategy.key1())
 
         val readEntities = repository.readAll()
 
-        assertEquals(listOf(savedEntity2), readEntities)
+        assertEquals(expectedEntities, readEntities)
     }
 
     private fun testDeleteWithKeyThrowsDeleteEntityExceptionWhenKeyDoesNotExist() {
         val entityWithoutKey = strategy.createEntity()
-        val repository = strategy.repository()
+        val repository = strategy.createRepository()
         repository.create(entityWithoutKey)
 
         try {
             repository.deleteWithKey(strategy.key2())
-            fail()
+            fail("${DeleteEntityException::class.simpleName} is expected")
         } catch (e: DeleteEntityException) {
             assertTrue(true)
         }
@@ -404,15 +401,14 @@ class RepositoryAssert<Entity, Key>(private val strategy: RepositoryAssertStrate
     private fun testDeleteWithPredicate() {
         execute { testDeleteWithPredicateDeletesCorrectEntities() }
         execute { testDeleteWithPredicateDoNothingIfEntitiesDoNotExist() }
-        execute { testReadWithPredicateReturnsEmptyListIfEntitiesDoNotExist() }
+        execute { testDeleteWithPredicateReturnsEmptyListIfEntitiesDoNotExist() }
     }
 
     private fun testDeleteWithPredicateDeletesCorrectEntities() {
         val entity = strategy.createEntity()
-        val repository = strategy.repository()
+        val repository = strategy.createRepository()
         repository.create(entity)
         repository.create(entity)
-        val savedEntity1 = strategy.setKey(entity, strategy.key1())
         val savedEntity2 = strategy.setKey(entity, strategy.key2())
         val expectedEntities = listOf(savedEntity2)
 
@@ -425,7 +421,7 @@ class RepositoryAssert<Entity, Key>(private val strategy: RepositoryAssertStrate
 
     private fun testDeleteWithPredicateDoNothingIfEntitiesDoNotExist() {
         val entity = strategy.createEntity()
-        val repository = strategy.repository()
+        val repository = strategy.createRepository()
         repository.create(entity)
         val savedEntity1 = strategy.setKey(entity, strategy.key1())
 
@@ -437,8 +433,8 @@ class RepositoryAssert<Entity, Key>(private val strategy: RepositoryAssertStrate
         assertEquals(expectedEntities, readEntities)
     }
 
-    private fun testReadWithPredicateReturnsEmptyListIfEntitiesDoNotExist() {
-        val repository = strategy.repository()
+    private fun testDeleteWithPredicateReturnsEmptyListIfEntitiesDoNotExist() {
+        val repository = strategy.createRepository()
 
         repository.deleteWithPredicate(strategy.entityWithKeyPredicate(strategy.key1()))
 

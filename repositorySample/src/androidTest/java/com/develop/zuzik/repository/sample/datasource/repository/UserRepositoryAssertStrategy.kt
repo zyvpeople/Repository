@@ -9,15 +9,14 @@ import com.develop.zuzik.repository.sample.domain.entity.User
  * User: zuzik
  * Date: 1/13/17
  */
-class UserRepositoryAssertStrategy(private val createRepository: () -> Repository<User, Long>,
+class UserRepositoryAssertStrategy(private val createRepo: () -> Repository<User, Long>,
                                    private val clearRepo: () -> Unit,
                                    private val entityWithKeyPredicateFactory: (key: Long) -> Predicate<User>) : RepositoryAssertStrategy<User, Long> {
 
-    override fun clearRepository() {
-        clearRepo()
-    }
 
-    override fun repository() = createRepository()
+    override fun createRepository() = createRepo()
+
+    override fun clearRepository() = clearRepo()
 
     override fun createEntity() = User(
             id = null,
@@ -29,8 +28,6 @@ class UserRepositoryAssertStrategy(private val createRepository: () -> Repositor
     override fun key1() = 1L
 
     override fun key2() = 2L
-
-    override fun notExistedKey() = 100500L
 
     override fun getKey(entity: User) = entity.id ?: 0
 

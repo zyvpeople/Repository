@@ -8,6 +8,7 @@ import com.develop.zuzik.repository.core.exception.*
  * User: zuzik
  * Date: 1/7/17
  */
+//TODO: throw error with message
 open class MemoryRepository<Entity, in Key>(
         private val keyGenerator: KeyGenerator<Key>,
         private val getKey: (Entity) -> Key?,

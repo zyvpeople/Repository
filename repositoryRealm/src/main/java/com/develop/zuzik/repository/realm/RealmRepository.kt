@@ -29,7 +29,7 @@ open class RealmRepository<Entity, in Key, RealmEntity : RealmModel>(
     @Throws(CreateEntityException::class)
     override fun create(entity: Entity): Entity {
         if (getKey(entity) != null) {
-            throw CreateEntityException()
+            throw CreateEntityException.Factory.entityDoesNotHaveKey(entity)
         }
         try {
             val copyWithoutKey = copy(entity)
@@ -41,7 +41,7 @@ open class RealmRepository<Entity, in Key, RealmEntity : RealmModel>(
             }
             return copyWithKey
         } catch (e: Exception) {
-            throw CreateEntityException()
+            throw CreateEntityException(e.message)
         }
     }
 
@@ -52,10 +52,10 @@ open class RealmRepository<Entity, in Key, RealmEntity : RealmModel>(
             return if (entity != null) {
                 realmEntityToEntity(entity)
             } else {
-                throw ReadEntityException()
+                throw ReadEntityException.Factory.entityWithKeyDoesNotExist(key)
             }
         } catch (e: Exception) {
-            throw ReadEntityException()
+            throw ReadEntityException(e.message)
         }
     }
 
@@ -66,7 +66,7 @@ open class RealmRepository<Entity, in Key, RealmEntity : RealmModel>(
             val result = realmPredicate.where(realm.where(realmEntityClass)).findAll()
             return result.map { realmEntityToEntity(it) }
         } catch (e: Exception) {
-            throw ReadEntityException()
+            throw ReadEntityException(e.message)
         }
     }
 
@@ -75,45 +75,38 @@ open class RealmRepository<Entity, in Key, RealmEntity : RealmModel>(
         try {
             return realm.where(realmEntityClass).findAll().map { realmEntityToEntity(it) }
         } catch (e: Exception) {
-            throw ReadEntityException()
+            throw ReadEntityException(e.message)
         }
     }
 
     @Throws(UpdateEntityException::class)
     override fun update(entity: Entity): Entity {
         try {
-            val key = getKey(entity)
-            if (key == null) {
-                throw UpdateEntityException()
-            }
+            val key = getKey(entity) ?: throw UpdateEntityException.Factory.entityDoesNotHaveKey(entity)
             val existedEntity = readWithKey(key)
 
             var realmEntity: RealmEntity? = null
             realm.executeTransaction {
-                realmEntity = it.copyToRealmOrUpdate(entityToRealmEntity(entity)) }
-            return realmEntityToEntity(realmEntity ?: throw UpdateEntityException())
-        } catch (e: Exception) {
-            val message = e.message
-            if (message != null) {
-                throw UpdateEntityException(message)
-            } else {
-                throw UpdateEntityException()
+                realmEntity = it.copyToRealmOrUpdate(entityToRealmEntity(entity))
             }
+            return realmEntityToEntity(realmEntity ?: throw UpdateEntityException.Factory.unreachableSituation())
+        } catch (e: Exception) {
+            throw UpdateEntityException(e.message)
         }
     }
 
     @Throws(DeleteEntityException::class)
     override fun delete(entity: Entity) {
-        deleteWithKey(getKey(entity) ?: throw DeleteEntityException())
+        deleteWithKey(getKey(entity) ?: throw DeleteEntityException.Factory.entityDoesNotHaveKey(entity))
     }
 
     @Throws(DeleteEntityException::class)
     override fun deleteWithKey(key: Key) {
         try {
-            val realmEntity = keyWhereQuery(realm.where(realmEntityClass), key).findFirst() ?: throw DeleteEntityException()
+            val realmEntity = keyWhereQuery(realm.where(realmEntityClass), key).findFirst() ?: throw DeleteEntityException.Factory.entityWithKeyDoesNotExist(key)
             realm.executeTransaction { RealmObject.deleteFromRealm(realmEntity) }
         } catch (e: Exception) {
-            throw DeleteEntityException()
+            throw DeleteEntityException(e.message)
         }
     }
 
@@ -124,7 +117,7 @@ open class RealmRepository<Entity, in Key, RealmEntity : RealmModel>(
             val entities = realmPredicate.where(realm.where(realmEntityClass)).findAll()
             realm.executeTransaction { entities.deleteAllFromRealm() }
         } catch (e: Exception) {
-            throw DeleteEntityException()
+            throw DeleteEntityException(e.message)
         }
     }
 }

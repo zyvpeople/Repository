@@ -9,13 +9,12 @@ import com.develop.zuzik.repository.core.Repository
  */
 interface RepositoryAssertStrategy<Entity, Key> {
 
+    fun createRepository(): Repository<Entity, Key>
     fun clearRepository()
-    fun repository(): Repository<Entity, Key>
     fun createEntity(): Entity
     fun hasKey(entity: Entity): Boolean
     fun key1(): Key
     fun key2(): Key
-    fun notExistedKey(): Key
     fun getKey(entity: Entity): Key
     fun setKey(entity: Entity, key: Key): Entity
     fun entityWithKeyPredicate(key: Key): Predicate<Entity>

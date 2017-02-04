@@ -14,6 +14,7 @@ import com.develop.zuzik.repository.core.exception.UpdateEntityException
  * User: zuzik
  * Date: 1/12/17
  */
+//TODO: throw error with message
 open class ActiveAndroidRepository<Entity, ActiveAndroidEntity : Model>(
         private val activeAndroidEntityClass: Class<ActiveAndroidEntity>,
         private val entityToActiveAndroidEntity: (Entity) -> ActiveAndroidEntity,

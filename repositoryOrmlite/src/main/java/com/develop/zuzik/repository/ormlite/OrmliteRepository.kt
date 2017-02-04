@@ -12,6 +12,7 @@ import com.j256.ormlite.dao.Dao
  * User: zuzik
  * Date: 1/11/17
  */
+//TODO: throw error with message
 open class OrmliteRepository<Entity, in Key, OrmliteEntity>(
         private val dao: Dao<OrmliteEntity, Key>,
         private val getKey: (Entity) -> Key?,
