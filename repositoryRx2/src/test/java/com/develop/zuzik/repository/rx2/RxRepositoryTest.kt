@@ -1,4 +1,4 @@
-package com.develop.zuzik.repository.rx
+package com.develop.zuzik.repository.rx2
 
 import com.develop.zuzik.repository.core.Predicate
 import com.develop.zuzik.repository.core.Repository
@@ -8,7 +8,6 @@ import com.develop.zuzik.repository.core.exception.ReadEntityException
 import com.develop.zuzik.repository.core.exception.UpdateEntityException
 import org.junit.Test
 import org.mockito.Mockito
-import rx.observers.TestSubscriber
 
 /**
  * User: zuzik
@@ -23,42 +22,40 @@ class RxRepositoryTest {
     fun createSendsOnNextAndOnCompletedEvents() {
         Mockito.`when`(mockRepository.create("entityToCreate")).thenReturn("createdEntity")
 
-        val mockSubscriber = TestSubscriber<String>()
-        rxRepository.create("entityToCreate").subscribe(mockSubscriber)
-
-        mockSubscriber.assertValues("createdEntity")
-        mockSubscriber.assertCompleted()
+        rxRepository
+                .create("entityToCreate")
+                .test()
+                .assertResult("createdEntity")
     }
 
     @Test
     fun createSendsOnErrorEventWhenCreateThrowsException() {
         Mockito.`when`(mockRepository.create("entityToCreate")).thenThrow(CreateEntityException())
 
-        val mockSubscriber = TestSubscriber<String>()
-        rxRepository.create("entityToCreate").subscribe(mockSubscriber)
-
-        mockSubscriber.assertError(CreateEntityException::class.java)
+        rxRepository
+                .create("entityToCreate")
+                .test()
+                .assertError(CreateEntityException::class.java)
     }
 
     @Test
     fun readWithKeySendsOnNextAndOnCompletedEvents() {
         Mockito.`when`(mockRepository.readWithKey(1)).thenReturn("readEntity")
 
-        val mockSubscriber = TestSubscriber<String>()
-        rxRepository.readWithKey(1).subscribe(mockSubscriber)
-
-        mockSubscriber.assertValues("readEntity")
-        mockSubscriber.assertCompleted()
+        rxRepository
+                .readWithKey(1)
+                .test()
+                .assertResult("readEntity")
     }
 
     @Test
     fun readWithKeySendsOnErrorEventWhenReadWithKeyThrowsException() {
         Mockito.`when`(mockRepository.readWithKey(1)).thenThrow(ReadEntityException())
 
-        val mockSubscriber = TestSubscriber<String>()
-        rxRepository.readWithKey(1).subscribe(mockSubscriber)
-
-        mockSubscriber.assertError(ReadEntityException::class.java)
+        rxRepository
+                .readWithKey(1)
+                .test()
+                .assertError(ReadEntityException::class.java)
     }
 
     @Test
@@ -66,11 +63,10 @@ class RxRepositoryTest {
         val predicate = Mockito.mock(Predicate::class.java) as Predicate<String>
         Mockito.`when`(mockRepository.readWithPredicate(predicate)).thenReturn(listOf("readEntity1", "readEntity2"))
 
-        val mockSubscriber = TestSubscriber<List<String>>()
-        rxRepository.readWithPredicate(predicate).subscribe(mockSubscriber)
-
-        mockSubscriber.assertValues(listOf("readEntity1", "readEntity2"))
-        mockSubscriber.assertCompleted()
+        rxRepository
+                .readWithPredicate(predicate)
+                .test()
+                .assertResult(listOf("readEntity1", "readEntity2"))
     }
 
     @Test
@@ -78,101 +74,96 @@ class RxRepositoryTest {
         val predicate = Mockito.mock(Predicate::class.java) as Predicate<String>
         Mockito.`when`(mockRepository.readWithPredicate(predicate)).thenThrow(ReadEntityException())
 
-        val mockSubscriber = TestSubscriber<List<String>>()
-        rxRepository.readWithPredicate(predicate).subscribe(mockSubscriber)
-
-        mockSubscriber.assertError(ReadEntityException::class.java)
+        rxRepository
+                .readWithPredicate(predicate)
+                .test()
+                .assertError(ReadEntityException::class.java)
     }
 
     @Test
     fun readAllSendsOnNextAndOnCompletedEvents() {
         Mockito.`when`(mockRepository.readAll()).thenReturn(listOf("readEntity1", "readEntity2"))
 
-        val mockSubscriber = TestSubscriber<List<String>>()
-        rxRepository.readAll().subscribe(mockSubscriber)
-
-        mockSubscriber.assertValues(listOf("readEntity1", "readEntity2"))
-        mockSubscriber.assertCompleted()
+        rxRepository
+                .readAll()
+                .test()
+                .assertResult(listOf("readEntity1", "readEntity2"))
     }
 
     @Test
     fun readAllSendsOnErrorEventWhenReadAllThrowsException() {
         Mockito.`when`(mockRepository.readAll()).thenThrow(ReadEntityException())
 
-        val mockSubscriber = TestSubscriber<List<String>>()
-        rxRepository.readAll().subscribe(mockSubscriber)
-
-        mockSubscriber.assertError(ReadEntityException::class.java)
+        rxRepository
+                .readAll()
+                .test()
+                .assertError(ReadEntityException::class.java)
     }
 
     @Test
     fun updateSendsOnNextAndOnCompletedEvents() {
         Mockito.`when`(mockRepository.update("entityToUpdate")).thenReturn("updatedEntity")
 
-        val mockSubscriber = TestSubscriber<String>()
-        rxRepository.update("entityToUpdate").subscribe(mockSubscriber)
-
-        mockSubscriber.assertValues("updatedEntity")
-        mockSubscriber.assertCompleted()
+        rxRepository
+                .update("entityToUpdate")
+                .test()
+                .assertResult("updatedEntity")
     }
 
     @Test
     fun updateSendsOnErrorEventWhenUpdateThrowsException() {
         Mockito.`when`(mockRepository.update("entityToUpdate")).thenThrow(UpdateEntityException())
 
-        val mockSubscriber = TestSubscriber<String>()
-        rxRepository.update("entityToUpdate").subscribe(mockSubscriber)
-
-        mockSubscriber.assertError(UpdateEntityException::class.java)
+        rxRepository
+                .update("entityToUpdate")
+                .test()
+                .assertError(UpdateEntityException::class.java)
     }
 
     @Test
     fun deleteSendsOnNextAndOnCompletedEvents() {
-        val mockSubscriber = TestSubscriber<Boolean>()
-        rxRepository.delete("entityToDelete").subscribe(mockSubscriber)
-
-        mockSubscriber.assertValues(true)
-        mockSubscriber.assertCompleted()
+        rxRepository
+                .delete("entityToDelete")
+                .test()
+                .assertComplete()
     }
 
     @Test
     fun deleteSendsOnErrorEventWhenDeleteThrowsException() {
         Mockito.`when`(mockRepository.delete("entityToDelete")).thenThrow(DeleteEntityException())
 
-        val mockSubscriber = TestSubscriber<Boolean>()
-        rxRepository.delete("entityToDelete").subscribe(mockSubscriber)
-
-        mockSubscriber.assertError(DeleteEntityException::class.java)
+        rxRepository
+                .delete("entityToDelete")
+                .test()
+                .assertError(DeleteEntityException::class.java)
     }
 
     @Test
     fun deleteWithKeySendsOnNextAndOnCompletedEvents() {
-        val mockSubscriber = TestSubscriber<Boolean>()
-        rxRepository.deleteWithKey(1).subscribe(mockSubscriber)
-
-        mockSubscriber.assertValues(true)
-        mockSubscriber.assertCompleted()
+        rxRepository
+                .deleteWithKey(1)
+                .test()
+                .assertComplete()
     }
 
     @Test
     fun deleteWithKeySendsOnErrorEventWhenDeleteWithKeyThrowsException() {
         Mockito.`when`(mockRepository.deleteWithKey(1)).thenThrow(DeleteEntityException())
 
-        val mockSubscriber = TestSubscriber<Boolean>()
-        rxRepository.deleteWithKey(1).subscribe(mockSubscriber)
-
-        mockSubscriber.assertError(DeleteEntityException::class.java)
+        rxRepository
+                .deleteWithKey(1)
+                .test()
+                .assertError(DeleteEntityException::class.java)
     }
 
     @Test
     fun deleteWithPredicateSendsOnNextAndOnCompletedEvents() {
         val predicate = Mockito.mock(Predicate::class.java) as Predicate<String>
 
-        val mockSubscriber = TestSubscriber<Boolean>()
-        rxRepository.deleteWithPredicate(predicate).subscribe(mockSubscriber)
-
-        mockSubscriber.assertValues(true)
-        mockSubscriber.assertCompleted()
+        rxRepository
+                .deleteWithPredicate(predicate)
+                .test()
+                .assertComplete()
     }
 
     @Test
@@ -180,9 +171,9 @@ class RxRepositoryTest {
         val predicate = Mockito.mock(Predicate::class.java) as Predicate<String>
         Mockito.`when`(mockRepository.deleteWithPredicate(predicate)).thenThrow(DeleteEntityException())
 
-        val mockSubscriber = TestSubscriber<Boolean>()
-        rxRepository.deleteWithPredicate(predicate).subscribe(mockSubscriber)
-
-        mockSubscriber.assertError(DeleteEntityException::class.java)
+        rxRepository
+                .deleteWithPredicate(predicate)
+                .test()
+                .assertError(DeleteEntityException::class.java)
     }
 }

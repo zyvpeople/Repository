@@ -34,6 +34,7 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile project(':repositoryMemory')
     compile project(':repositoryRx')
+    compile project(':repositoryRx2')
     compile project(':repositoryRealm')
     compile project(':repositoryOrmlite')
     compile project(':repositoryActiveAndroid')

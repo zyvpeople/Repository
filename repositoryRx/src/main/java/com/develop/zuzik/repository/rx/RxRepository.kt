@@ -27,5 +27,4 @@ class RxRepository<Entity, in Key>(private val repository: Repository<Entity, Ke
     fun deleteWithKey(key: Key): Observable<Boolean> = defer { just(repository.deleteWithKey(key)) }.map { true }
 
     fun deleteWithPredicate(predicate: Predicate<Entity>): Observable<Boolean> = defer { just(repository.deleteWithPredicate(predicate)) }.map { true }
-
 }

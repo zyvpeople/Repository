@@ -1,1 +1,1 @@
-include ':repositorySample', ':repositoryCore', ':repositoryMemory', ':repositoryRx', ':repositoryRealm', ':repositoryOrmlite', ':repositoryActiveAndroid', ':repositoryAsserts'
+include ':repositorySample', ':repositoryCore', ':repositoryMemory', ':repositoryRx', ':repositoryRealm', ':repositoryOrmlite', ':repositoryActiveAndroid', ':repositoryAsserts', ':repositoryRx2'
