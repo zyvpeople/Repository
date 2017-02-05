@@ -83,7 +83,7 @@ class RepositoryAssert<Entity, Key>(private val strategy: RepositoryAssertStrate
             val entity = strategy.createEntity()
             val entityWithKey = strategy.setKey(entity, strategy.key1())
             strategy.createRepository().create(entityWithKey)
-            fail("${CreateEntityException::class.simpleName} is expected")
+            fail("${CreateEntityException::class.java.simpleName} is expected")
         } catch (e: CreateEntityException) {
             assertTrue(true)
         }
@@ -128,7 +128,7 @@ class RepositoryAssert<Entity, Key>(private val strategy: RepositoryAssertStrate
 
         try {
             repository.readWithKey(strategy.key2())
-            fail("${ReadEntityException::class.simpleName} is expected")
+            fail("${ReadEntityException::class.java.simpleName} is expected")
         } catch (e: ReadEntityException) {
             assertTrue(true)
         }
@@ -283,7 +283,7 @@ class RepositoryAssert<Entity, Key>(private val strategy: RepositoryAssertStrate
             repository.create(entityWithoutKey)
 
             repository.update(entityWithoutKey)
-            fail("${UpdateEntityException::class.simpleName} is expected")
+            fail("${UpdateEntityException::class.java.simpleName} is expected")
         } catch (e: UpdateEntityException) {
             assertTrue(true)
         }
@@ -298,7 +298,7 @@ class RepositoryAssert<Entity, Key>(private val strategy: RepositoryAssertStrate
             val notExistedEntity = strategy.setKey(entityWithoutKey, strategy.key2())
 
             repository.update(notExistedEntity)
-            fail("${UpdateEntityException::class.simpleName} is expected")
+            fail("${UpdateEntityException::class.java.simpleName} is expected")
         } catch (e: UpdateEntityException) {
             assertTrue(true)
         }
@@ -336,7 +336,7 @@ class RepositoryAssert<Entity, Key>(private val strategy: RepositoryAssertStrate
 
         try {
             repository.delete(entityWithoutKey)
-            fail("${DeleteEntityException::class.simpleName} is expected")
+            fail("${DeleteEntityException::class.java.simpleName} is expected")
         } catch (e: DeleteEntityException) {
             assertTrue(true)
         }
@@ -351,7 +351,7 @@ class RepositoryAssert<Entity, Key>(private val strategy: RepositoryAssertStrate
 
         try {
             repository.delete(notExistedEntity)
-            fail("${DeleteEntityException::class.simpleName} is expected")
+            fail("${DeleteEntityException::class.java.simpleName} is expected")
         } catch (e: DeleteEntityException) {
             assertTrue(true)
         }
@@ -388,7 +388,7 @@ class RepositoryAssert<Entity, Key>(private val strategy: RepositoryAssertStrate
 
         try {
             repository.deleteWithKey(strategy.key2())
-            fail("${DeleteEntityException::class.simpleName} is expected")
+            fail("${DeleteEntityException::class.java.simpleName} is expected")
         } catch (e: DeleteEntityException) {
             assertTrue(true)
         }

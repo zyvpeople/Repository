@@ -9,6 +9,7 @@ class UpdateEntityException(message: String?) : Exception(message ?: UpdateEntit
 
     object Factory {
         fun entityDoesNotHaveKey(entity: Any?) = UpdateEntityException("Entity $entity does not have key")
+        fun entityIsNotUpdated(entity: Any?) = UpdateEntityException("Entity $entity is not updated")
         fun unreachableSituation() = UpdateEntityException("Unreachable situation")
     }
 }

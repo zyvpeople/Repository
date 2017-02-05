@@ -12,7 +12,6 @@ import com.j256.ormlite.dao.Dao
  * User: zuzik
  * Date: 1/11/17
  */
-//TODO: throw error with message
 open class OrmliteRepository<Entity, in Key, OrmliteEntity>(
         private val dao: Dao<OrmliteEntity, Key>,
         private val getKey: (Entity) -> Key?,
@@ -24,24 +23,24 @@ open class OrmliteRepository<Entity, in Key, OrmliteEntity>(
     @Throws(CreateEntityException::class)
     override fun create(entity: Entity): Entity {
         if (getKey(entity) != null) {
-            throw CreateEntityException()
+            throw CreateEntityException.Factory.entityDoesNotHaveKey(entity)
         }
         try {
             val ormliteEntity = entityToOrmliteEntity(entity)
             val createdOrmliteEntity = dao.createIfNotExists(ormliteEntity)
             return ormliteEntityToEntity(createdOrmliteEntity)
         } catch (e: Exception) {
-            throw CreateEntityException()
+            throw CreateEntityException(e.message)
         }
     }
 
     @Throws(ReadEntityException::class)
     override fun readWithKey(key: Key): Entity {
         try {
-            val ormliteEntity = dao.queryForId(key) ?: throw ReadEntityException()
+            val ormliteEntity = dao.queryForId(key) ?: throw ReadEntityException.Factory.entityWithKeyDoesNotExist(key)
             return ormliteEntityToEntity(ormliteEntity)
         } catch (e: Exception) {
-            throw ReadEntityException()
+            throw ReadEntityException(e.message)
         }
     }
 
@@ -53,7 +52,7 @@ open class OrmliteRepository<Entity, in Key, OrmliteEntity>(
             queryBuilder.setWhere(ormlitePredicate.where(queryBuilder.where()))
             return queryBuilder.query().map { ormliteEntityToEntity(it) }
         } catch (e: Exception) {
-            throw ReadEntityException()
+            throw ReadEntityException(e.message)
         }
     }
 
@@ -62,32 +61,41 @@ open class OrmliteRepository<Entity, in Key, OrmliteEntity>(
         try {
             return dao.queryForAll().map { ormliteEntityToEntity(it) }
         } catch (e: Exception) {
-            throw ReadEntityException()
+            throw ReadEntityException(e.message)
         }
     }
 
     @Throws(UpdateEntityException::class)
     override fun update(entity: Entity): Entity {
         try {
-            //TODO: check if id exist and entity with id exist
-            dao.update(entityToOrmliteEntity(entity))
-            return copy(entity)
+            if (getKey(entity) == null) {
+                throw UpdateEntityException.Factory.entityDoesNotHaveKey(entity)
+            }
+            val updatedEntitiesCount = dao.update(entityToOrmliteEntity(entity))
+            return if (updatedEntitiesCount == 1) {
+                copy(entity)
+            } else {
+                throw UpdateEntityException.Factory.entityIsNotUpdated(entity)
+            }
         } catch (e: Exception) {
-            throw UpdateEntityException()
+            throw UpdateEntityException(e.message)
         }
     }
 
     @Throws(DeleteEntityException::class)
     override fun delete(entity: Entity) {
-        deleteWithKey(getKey(entity) ?: throw DeleteEntityException())
+        deleteWithKey(getKey(entity) ?: throw DeleteEntityException.Factory.entityDoesNotHaveKey(entity))
     }
 
     @Throws(DeleteEntityException::class)
     override fun deleteWithKey(key: Key) {
         try {
-            dao.deleteById(key)
+            val deletedEntitiesCount = dao.deleteById(key)
+            if (deletedEntitiesCount == 0) {
+                throw DeleteEntityException.Factory.entityWithKeyDoesNotExist(key)
+            }
         } catch (e: Exception) {
-            throw DeleteEntityException()
+            throw DeleteEntityException(e.message)
         }
     }
 
@@ -99,7 +107,7 @@ open class OrmliteRepository<Entity, in Key, OrmliteEntity>(
             deleteBuilder.setWhere(ormlitePredicate.where(deleteBuilder.where()))
             deleteBuilder.delete()
         } catch (e: Exception) {
-            throw DeleteEntityException()
+            throw DeleteEntityException(e.message)
         }
     }
 }
