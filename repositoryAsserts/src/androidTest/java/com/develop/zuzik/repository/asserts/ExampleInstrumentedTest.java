@@ -1,4 +1,4 @@
-package com.develop.zuzik.repository.sample;
+package com.develop.zuzik.repository.asserts;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
@@ -19,8 +19,8 @@ public class ExampleInstrumentedTest {
 	@Test
 	public void useAppContext() throws Exception {
 		// Context of the app under test.
-//		Context appContext = InstrumentationRegistry.getTargetContext();
+		Context appContext = InstrumentationRegistry.getTargetContext();
 
-//		assertEquals("com.develop.zuzik.repository", appContext.getPackageName());
+		assertEquals("com.develop.zuzik.repository.asserts.test", appContext.getPackageName());
 	}
 }
